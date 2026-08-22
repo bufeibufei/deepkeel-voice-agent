@@ -1,0 +1,8 @@
+services:
+  voice-agent:
+    build: .
+    container_name: deepkeel-voice-agent
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8020:8000"

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>声旅 · DeepKeel Voice Agent</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <link rel="stylesheet" href="./assets/styles.css?v=20260822-mcp4" />
+  </head>
+  <body>
+    <div class="ambient" aria-hidden="true"></div>
+    <header class="nav">
+      <a class="wordmark" href="./" aria-label="声旅首页">声旅<span>／DeepKeel</span></a>
+      <button class="searchpill" id="prompt-picker" type="button" aria-haspopup="dialog">
+        <span aria-hidden="true">⌕</span><span class="searchpill__text">试一个问题</span><kbd>Ctrl K</kbd>
+      </button>
+      <div class="connection" id="connection" data-state="loading"><span></span><b>正在连接</b></div>
+    </header>
+
+    <main class="workbench" id="app-root">
+      <section class="conversation" aria-labelledby="conversation-title">
+        <div class="section-head">
+          <div><p class="eyebrow">实时会话</p><h1 id="conversation-title">说出目的地。</h1></div>
+          <p id="mode-copy">正在准备语音通道和 Agent Runtime。</p>
+        </div>
+
+        <div class="transcript" id="transcript" aria-live="polite">
+          <div class="empty" id="empty-state">
+            <p>问天气，或让我规划一趟行程。</p>
+            <button class="text-link" data-example="我想从杭州去上海两天，喜欢建筑和美食，帮我规划行程">使用示例问题 →</button>
+          </div>
+        </div>
+
+        <div class="live-caption" id="live-caption" aria-live="polite" hidden>
+          <span>正在听</span><p></p>
+        </div>
+
+        <div class="composer">
+          <button class="mic" id="mic" type="button" data-state="default" aria-label="开始语音输入" aria-pressed="false">
+            <span class="mic__rings" aria-hidden="true"></span><span class="mic__icon" aria-hidden="true">●</span><span class="mic__label">开始说话</span>
+          </button>
+          <form class="text-form" id="text-form">
+            <label for="text-input">文字备用输入</label>
+            <div class="text-form__row">
+              <input id="text-input" name="question" autocomplete="off" placeholder="例如：杭州今天天气怎么样？" />
+              <button class="send" type="submit" data-state="default">发送</button>
+            </div>
+            <p class="helper" id="input-helper">语音不可用时仍可完整验证规划与 MCP。</p>
+          </form>
+        </div>
+      </section>
+
+      <aside class="trace" aria-labelledby="trace-title">
+        <div class="trace__head"><h2 id="trace-title">Agent 在做什么</h2><button class="clear" id="clear-trace" type="button">清空</button></div>
+        <ol id="trace-list" aria-live="polite"><li class="trace__idle"><span></span><p>等待一次问题。规划、工具和总结事件会显示在这里。</p></li></ol>
+        <dl class="runtime-facts">
+          <div><dt>框架</dt><dd>DeepKeel 4.1</dd></div>
+          <div><dt>模式</dt><dd id="runtime-mode">检测中</dd></div>
+          <div class="runtime-facts__tools"><dt>MCP 工具</dt><dd id="mcp-tools">检测中</dd></div>
+        </dl>
+      </aside>
+    </main>
+
+    <footer class="foot-stmt">
+      <p class="foot-stmt__line">你说想去哪，我们就从那里出发。</p>
+      <div class="foot-stmt__meta"><span>音频仅用于当前会话</span><span id="latency">尚无运行数据</span></div>
+    </footer>
+
+    <dialog class="cmdk" id="prompt-dialog" aria-labelledby="prompt-dialog-title">
+      <form method="dialog" class="cmdk__panel">
+        <div class="cmdk__field"><span aria-hidden="true">⌕</span><input id="prompt-search" aria-label="筛选示例问题" placeholder="筛选天气或旅行问题" /><button value="cancel" aria-label="关闭">Esc</button></div>
+        <h2 id="prompt-dialog-title">选择一个真实任务</h2>
+        <div class="cmdk__results">
+          <button value="杭州今天天气怎么样？" data-prompt>杭州今天天气怎么样？<small>单工具查询</small></button>
+          <button value="我想从杭州去上海两天，喜欢建筑和美食，帮我规划行程" data-prompt>杭州到上海，两天建筑与美食<small>多步规划</small></button>
+          <button value="上海周末会下雨吗？如果下雨，帮我换成室内行程" data-prompt>上海雨天室内行程<small>天气＋地点</small></button>
+        </div>
+        <p class="cmdk__foot">↑ ↓ 选择 · Enter 使用 · Esc 关闭</p>
+      </form>
+    </dialog>
+    <script type="module" src="./assets/app.js?v=20260822-deploy1"></script>
+  </body>
+</html>

@@ -7,6 +7,7 @@ RUN sed -i 's|http://deb.debian.org/debian-security|https://mirrors.aliyun.com/d
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+ENV UV_DEFAULT_INDEX="https://mirrors.aliyun.com/pypi/simple"
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 

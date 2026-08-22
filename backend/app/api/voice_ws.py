@@ -157,7 +157,6 @@ class VoiceSession:
             recent_messages=self.recent_messages,
         )
         self.recent_messages.append({"role": "user", "content": question})
-        self.recent_messages = self.recent_messages[-12:]
         self.run_id = request.run_id
         await self.send(
             "turn.started", turn_id=turn_id, run_id=request.run_id, text=question, source=source
@@ -248,8 +247,13 @@ class VoiceSession:
                 await self.tts.finish()
                 self.tts = None
             if answer_text.strip():
+                context_state = self.agent.conversation_context(self.conversation_id)
+                if context_state is not None:
+                    self.recent_messages = [
+                        *context_state.recent_messages,
+                        {"role": "user", "content": str(request.question)},
+                    ]
                 self.recent_messages.append({"role": "assistant", "content": answer_text.strip()})
-                self.recent_messages = self.recent_messages[-12:]
             await self.send("turn.completed", turn_id=turn_id, run_id=request.run_id)
         except asyncio.CancelledError:
             await self.send("turn.cancelled", turn_id=turn_id, run_id=request.run_id)
@@ -330,6 +334,7 @@ class VoiceSession:
             await asyncio.gather(self.asr_task, return_exceptions=True)
         if self.asr is not None:
             await self.asr.close()
+        self.agent.discard_conversation_context(self.conversation_id)
 
 
 async def voice_socket(websocket: WebSocket, agent: AgentRuntime, settings: Settings) -> None:

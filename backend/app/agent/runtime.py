@@ -13,6 +13,10 @@ from deepkeel.runtime_sdk import (
     RuntimeRequest,
 )
 
+from backend.app.agent.context_memory import (
+    ConversationContextState,
+    RetainedConversationContextWindowManager,
+)
 from backend.app.agent.provider import ArkChatProvider, DemoTravelProvider
 from backend.app.agent.travel_pack import TravelCapabilityPack
 from backend.app.settings import Settings
@@ -31,7 +35,14 @@ SYSTEM_PROMPT = """你是一个中文语音旅行助理。你的核心决策必�
 class AgentRuntime:
     harness: AgentHarness
     operations: RunOperations
+    context_window_manager: RetainedConversationContextWindowManager
     live: bool
+
+    def conversation_context(self, conversation_id: str) -> ConversationContextState | None:
+        return self.context_window_manager.snapshot(conversation_id)
+
+    def discard_conversation_context(self, conversation_id: str) -> None:
+        self.context_window_manager.discard(conversation_id)
 
     def request(
         self,
@@ -70,10 +81,12 @@ def build_agent_runtime(settings: Settings) -> AgentRuntime:
     state_store = InMemoryRuntimeStateStore()
     event_journal = InMemoryRuntimeEventJournal()
     run_control = InMemoryRunControl()
+    context_window_manager = RetainedConversationContextWindowManager()
     ports = RuntimePorts(
         runtime_state_store=state_store,
         event_journal=event_journal,
         run_control=run_control,
+        context_window_manager=context_window_manager,
         planning_enabled=True,
         system_prompt_factory=lambda _skill: SYSTEM_PROMPT,
     )
@@ -102,5 +115,6 @@ def build_agent_runtime(settings: Settings) -> AgentRuntime:
     return AgentRuntime(
         harness=harness,
         operations=RunOperations(state_store, run_control=run_control),
+        context_window_manager=context_window_manager,
         live=settings.agent_live_enabled,
     )

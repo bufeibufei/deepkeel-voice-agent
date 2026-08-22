@@ -41,6 +41,13 @@ class FakeAgent:
     def __init__(self) -> None:
         self.operations = FakeOperations()
         self.harness = FakeHarness()
+        self.context_state = None
+
+    def conversation_context(self, _conversation_id: str):
+        return self.context_state
+
+    def discard_conversation_context(self, _conversation_id: str) -> None:
+        return None
 
 
 class FakeTts:
@@ -68,6 +75,24 @@ async def test_final_answer_without_native_deltas_is_streamed() -> None:
     assert len(deltas) > 1
     assert "".join(deltas).startswith("这是一个只在 runtime.result 中返回")
     assert websocket.events[-1]["type"] == "turn.completed"
+
+
+async def test_completed_turn_uses_deepkeel_retained_history() -> None:
+    websocket = FakeWebSocket()
+    agent = FakeAgent()
+    agent.context_state = SimpleNamespace(
+        recent_messages=[{"role": "user", "content": "压缩后保留的历史"}],
+        conversation_summary={"checkpoint_id": "context-1"},
+    )
+    session = VoiceSession(websocket, agent, Settings(voice_agent_demo_mode=True))
+    session.recent_messages = [{"role": "user", "content": "已经被压缩的旧历史"}]
+    request = SimpleNamespace(run_id="run-final-only", question="继续安排")
+
+    await session._stream_agent(request, "turn-0002")
+
+    assert session.recent_messages[0]["content"] == "压缩后保留的历史"
+    assert session.recent_messages[1] == {"role": "user", "content": "继续安排"}
+    assert session.recent_messages[2]["role"] == "assistant"
 
 
 async def test_barge_in_cancels_runtime_task_and_tts() -> None:

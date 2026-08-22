@@ -3,7 +3,7 @@ FROM python:3.12-slim-bookworm
 RUN sed -i 's|http://deb.debian.org/debian-security|https://mirrors.aliyun.com/debian-security|g; s|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian|g' /etc/apt/sources.list.d/debian.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
-    && pip install --no-cache-dir uv \
+    && pip install --no-cache-dir --index-url https://mirrors.aliyun.com/pypi/simple uv \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

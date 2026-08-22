@@ -9,7 +9,9 @@ RUN sed -i 's|http://deb.debian.org/debian-security|https://mirrors.aliyun.com/d
 WORKDIR /app
 ENV UV_DEFAULT_INDEX="https://mirrors.aliyun.com/pypi/simple"
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev
+RUN uv export --frozen --no-dev --no-hashes --output-file requirements.txt \
+    && python -m venv .venv \
+    && .venv/bin/pip install --no-cache-dir --index-url https://mirrors.aliyun.com/pypi/simple -r requirements.txt
 
 COPY backend ./backend
 COPY frontend ./frontend

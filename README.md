@@ -92,6 +92,8 @@ curl http://127.0.0.1:8020/health
 
 容器仅绑定服务器回环地址 `127.0.0.1:8020`，由 Nginx 反向代理公开页面和 WebSocket。生产环境建议绑定域名并配置 HTTPS，否则 Chrome 不会向公网 HTTP 页面开放麦克风。
 
+仓库中的 `deploy/nginx-voice-agent.conf` 是可嵌入现有 `server` 块的 Nginx 配置，统一代理页面、静态资源、健康检查和 WebSocket，并关闭代理缓冲以保证流式事件及时到达浏览器。
+
 ## 已知边界
 
 - 天气使用 Open-Meteo，地点使用 Nominatim，路线使用 OSRM；外部源失败时 MCP 返回标记为 `fallback` 的保守演示数据，Agent 必须明确提示用户核验。
